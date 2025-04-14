@@ -1,40 +1,41 @@
+if signal == 'buy':
+    qty = 0.013
+    symbol = "BTCUSDT"
 
-from flask import Flask, request
-from binance.um_futures import UMFutures
-import os
+    # 1. Colocar orden de compra market
+    order = client.new_order(
+        symbol=symbol,
+        side="BUY",
+        type="MARKET",
+        quantity=qty
+    )
 
-app = Flask(__name__)
+    # 2. Obtener precio de entrada real de la orden
+    fills = order.get("fills", [])
+    entry_price = float(fills[0]["price"]) if fills else 0.0
 
-# Obtener claves desde variables de entorno (Render)
-API_KEY = os.getenv("API_KEY")
-API_SECRET = os.getenv("API_SECRET")
+    # 3. Calcular precios de TP y SL
+    tp_price = round(entry_price * 1.015, 2)  # +1.5%
+    sl_price = round(entry_price * 0.99, 2)   # -1%
 
-client = UMFutures(key=API_KEY, secret=API_SECRET, base_url="https://testnet.binancefuture.com")
+    # 4. Colocar orden Take Profit
+    client.new_order(
+        symbol=symbol,
+        side="SELL",
+        type="TAKE_PROFIT_MARKET",
+        stopPrice=tp_price,
+        quantity=qty,
+        timeInForce="GTC"
+    )
 
-@app.route('/webhook', methods=['POST'])
-def webhook():
-    data = request.json
-    signal = data.get('signal')
+    # 5. Colocar orden Stop Loss
+    client.new_order(
+        symbol=symbol,
+        side="SELL",
+        type="STOP_MARKET",
+        stopPrice=sl_price,
+        quantity=qty,
+        timeInForce="GTC"
+    )
 
-    if signal == 'buy':
-        order = client.new_order(
-            symbol="BTCUSDT",
-            side="BUY",
-            type="MARKET",
-            quantity=0.002
-        )
-        return {"message": "🚀 Orden de COMPRA ejecutada"}
-
-    elif signal == 'sell':
-        order = client.new_order(
-            symbol="BTCUSDT",
-            side="SELL",
-            type="MARKET",
-            quantity=0.002
-        )
-        return {"message": "🔻 Orden de VENTA ejecutada"}
-
-    return {"message": "⚠️ Señal no reconocida"}
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)
+    return {"message": f"🟢 Orden BUY ejecutada con TP {tp_price} y SL {sl_price}"}
