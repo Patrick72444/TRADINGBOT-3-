@@ -57,9 +57,12 @@ def close_position():
 def webhook():
     global current_position, entry_price, entry_timestamp
 
-    data = request.json
-    signal = data.get('signal')
-    now = time.time()
+   from flask import json
+data = json.loads(request.data)
+
+signal = data.get('signal')
+now = time.time()
+
 
     # Configurar margen aislado y apalancamiento
     try:
