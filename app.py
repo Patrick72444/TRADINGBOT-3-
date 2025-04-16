@@ -15,7 +15,7 @@ client = UMFutures(key=API_KEY, secret=API_SECRET, base_url="https://testnet.bin
 symbol = "BTCUSDT"
 capital = 1000  # tu capital en USDT
 leverage = 2
-SL_PERCENT = -0,01  # stop loss en %
+SL_PERCENT = -0.01  # stop loss en %
 TP_PERCENT = 0.01  # activa el take profit con +0.01%
 
 # Telegram
