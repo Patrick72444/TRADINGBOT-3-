@@ -13,16 +13,15 @@ client = UMFutures(key=API_KEY, secret=API_SECRET, base_url="https://testnet.bin
 
 # Configuración
 symbol = "BTCUSDT"
-capital = 1000  # tu capital en USDT
+capital = 1000
 leverage = 2
-SL_PERCENT = -0.01  # stop loss en %
-TP_PERCENT = 0.01  # take profit en %
+SL_PERCENT = -0.01
+TP_PERCENT = 0.01
 
 # Telegram
 TELEGRAM_TOKEN = "8163150195:AAFKm-QOZ5lJn_2wvyggwhLOgbjqu2xl71o"
 TELEGRAM_CHAT_ID = "5086466173"
 
-# Estado del bot
 current_position = None
 entry_price = None
 entry_timestamp = None
@@ -37,14 +36,12 @@ def send_telegram(message):
 
 def close_position():
     global current_position, entry_price, entry_timestamp
-
     price = float(client.ticker_price(symbol=symbol)["price"])
     quantity = round((capital * leverage) / price, 3)
 
     if current_position == "long":
         client.new_order(symbol=symbol, side="SELL", type="MARKET", quantity=quantity)
         send_telegram(f"📤 Cerrada LONG a mercado")
-
     elif current_position == "short":
         client.new_order(symbol=symbol, side="BUY", type="MARKET", quantity=quantity)
         send_telegram(f"📤 Cerrada SHORT a mercado")
@@ -58,25 +55,26 @@ def webhook():
     global current_position, entry_price, entry_timestamp
 
     try:
-        data = json.loads(request.data.decode("utf-8"))
-    except:
+        raw_data = request.data.decode("utf-8")
+        print("📥 Payload recibido:", raw_data)
+        data = json.loads(raw_data)
+    except Exception as e:
+        print("❌ Error interpretando JSON:", e)
+        print("🧾 Contenido recibido:", request.data)
         return {"message": "⚠️ Error interpretando JSON"}, 400
 
     signal = data.get('signal')
     now = time.time()
 
-    # Configurar margen aislado y apalancamiento
     try:
         client.change_margin_type(symbol=symbol, marginType="ISOLATED")
     except:
         pass
     client.change_leverage(symbol=symbol, leverage=leverage)
 
-    # Calcular tamaño de la posición
     price = float(client.ticker_price(symbol=symbol)["price"])
     quantity = round((capital * leverage) / price, 3)
 
-    # Verificar SL y TP
     if current_position == "long" and entry_price:
         pnl_pct = ((price - entry_price) / entry_price) * 100
         if pnl_pct <= SL_PERCENT:
@@ -99,7 +97,6 @@ def webhook():
             send_telegram(f"🎯 TP SHORT alcanzado: {pnl_pct:.2f}%")
             return {"message": f"TP SHORT alcanzado: {pnl_pct:.2f}%"}
 
-    # Procesar señales
     if signal == "buy":
         if current_position != "long":
             close_position()
@@ -134,7 +131,6 @@ def webhook():
 
     return {"message": "⚠️ Señal no reconocida"}
 
-# Render: levantar servidor
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
 
