@@ -63,7 +63,6 @@ data = json.loads(request.data)
 signal = data.get('signal')
 now = time.time()
 
-
     # Configurar margen aislado y apalancamiento
     try:
         client.change_margin_type(symbol=symbol, marginType="ISOLATED")
