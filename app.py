@@ -16,6 +16,7 @@ symbol = "BTCUSDT"
 capital = 1000  # tu capital en USDT
 leverage = 2
 SL_PERCENT = -0,01  # stop loss en %
+TP_PERCENT = 0.01  # activa el take profit con +0.01%
 
 # Telegram
 TELEGRAM_TOKEN = "8163150195:AAFKm-QOZ5lJn_2wvyggwhLOgbjqu2xl71o"
