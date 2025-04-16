@@ -16,7 +16,7 @@ symbol = "BTCUSDT"
 capital = 1000  # tu capital en USDT
 leverage = 2
 SL_PERCENT = -0.01  # stop loss en %
-TP_PERCENT = 0.01  # activa el take profit con +0.01%
+TP_PERCENT = 0.01  # take profit en %
 
 # Telegram
 TELEGRAM_TOKEN = "8163150195:AAFKm-QOZ5lJn_2wvyggwhLOgbjqu2xl71o"
@@ -58,7 +58,7 @@ def webhook():
     global current_position, entry_price, entry_timestamp
 
     try:
-        data = json.loads(request.data)
+        data = json.loads(request.data.decode("utf-8"))
     except:
         return {"message": "⚠️ Error interpretando JSON"}, 400
 
@@ -76,7 +76,7 @@ def webhook():
     price = float(client.ticker_price(symbol=symbol)["price"])
     quantity = round((capital * leverage) / price, 3)
 
-    # Verificar Stop Loss dinámico
+    # Verificar SL y TP
     if current_position == "long" and entry_price:
         pnl_pct = ((price - entry_price) / entry_price) * 100
         if pnl_pct <= SL_PERCENT:
