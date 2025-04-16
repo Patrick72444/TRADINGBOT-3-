@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, json
 from binance.um_futures import UMFutures
 import os
 import time
@@ -57,11 +57,13 @@ def close_position():
 def webhook():
     global current_position, entry_price, entry_timestamp
 
-from flask import json
-data = json.loads(request.data)
+    try:
+        data = json.loads(request.data)
+    except:
+        return {"message": "⚠️ Error interpretando JSON"}, 400
 
-signal = data.get('signal')
-now = time.time()
+    signal = data.get('signal')
+    now = time.time()
 
     # Configurar margen aislado y apalancamiento
     try:
@@ -81,6 +83,10 @@ now = time.time()
             close_position()
             send_telegram(f"🛑 SL LONG alcanzado: {pnl_pct:.2f}%")
             return {"message": f"SL LONG alcanzado: {pnl_pct:.2f}%"}
+        elif pnl_pct >= TP_PERCENT:
+            close_position()
+            send_telegram(f"🎯 TP LONG alcanzado: {pnl_pct:.2f}%")
+            return {"message": f"TP LONG alcanzado: {pnl_pct:.2f}%"}
 
     if current_position == "short" and entry_price:
         pnl_pct = ((entry_price - price) / entry_price) * 100
@@ -88,6 +94,10 @@ now = time.time()
             close_position()
             send_telegram(f"🛑 SL SHORT alcanzado: {pnl_pct:.2f}%")
             return {"message": f"SL SHORT alcanzado: {pnl_pct:.2f}%"}
+        elif pnl_pct >= TP_PERCENT:
+            close_position()
+            send_telegram(f"🎯 TP SHORT alcanzado: {pnl_pct:.2f}%")
+            return {"message": f"TP SHORT alcanzado: {pnl_pct:.2f}%"}
 
     # Procesar señales
     if signal == "buy":
@@ -127,6 +137,5 @@ now = time.time()
 # Render: levantar servidor
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
-
 
 
