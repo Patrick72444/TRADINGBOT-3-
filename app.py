@@ -57,7 +57,7 @@ def close_position():
 def webhook():
     global current_position, entry_price, entry_timestamp
 
-   from flask import json
+from flask import json
 data = json.loads(request.data)
 
 signal = data.get('signal')
