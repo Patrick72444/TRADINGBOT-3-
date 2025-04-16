@@ -15,8 +15,8 @@ client = UMFutures(key=API_KEY, secret=API_SECRET, base_url="https://testnet.bin
 symbol = "BTCUSDT"
 capital = 1000
 leverage = 2
-SL_PERCENT = -0.01
-TP_PERCENT = 0.01
+SL_PERCENT = -1.5
+TP_PERCENT = 3
 
 # Telegram
 TELEGRAM_TOKEN = "8163150195:AAFKm-QOZ5lJn_2wvyggwhLOgbjqu2xl71o"
