@@ -55,13 +55,15 @@ def webhook():
     global current_position, entry_price, entry_timestamp
 
     try:
-        raw_data = request.data.decode("utf-8")
-        print("📥 Payload recibido:", raw_data)
-        data = json.loads(raw_data)
+        if request.is_json:
+            data = request.get_json()
+        else:
+            raw_data = request.form.get("signal")
+            data = {"signal": raw_data}
+        print("📥 Señal recibida:", data)
     except Exception as e:
-        print("❌ Error interpretando JSON:", e)
-        print("🧾 Contenido recibido:", request.data)
-        return {"message": "⚠️ Error interpretando JSON"}, 400
+        print("❌ Error interpretando señal:", e)
+        return {"message": "⚠️ Error interpretando señal"}, 400
 
     signal = data.get('signal')
     now = time.time()
@@ -133,5 +135,6 @@ def webhook():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
+
 
 
