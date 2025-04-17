@@ -15,7 +15,7 @@ client = UMFutures(key=API_KEY, secret=API_SECRET, base_url="https://testnet.bin
 symbol = "BTCUSDT"
 capital = 1000
 leverage = 2
-SL_PERCENT = -1.5
+SL_PERCENT = -1
 TP_PERCENT = 3
 
 # Telegram
